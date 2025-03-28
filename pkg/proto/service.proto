@@ -1,0 +1,17 @@
+syntax = "proto3";
+package proxy;
+option go_package = "github.com/Emircaan/reverse-proxy/proto";
+
+
+service ProxyService {
+    rpc ForwardRequest(Request) returns (Response);
+}
+
+
+message Request {
+    string message = 1;
+}
+
+message Response {
+    string result = 1;
+}
