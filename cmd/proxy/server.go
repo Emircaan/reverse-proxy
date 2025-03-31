@@ -7,8 +7,9 @@ import (
 	"net"
 	"time"
 
-	"github.com/Emircaan/reverse-proxy/cmd/middleware"
+	"github.com/Emircaan/reverse-proxy/pkg/middleware"
 	"github.com/Emircaan/reverse-proxy/pkg/proto"
+	"github.com/ethereum/go-ethereum/ethclient"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
 )
@@ -53,9 +54,15 @@ func main() {
 		backendClients = append(backendClients, proto.NewProxyServiceClient(conn))
 	}
 
+	client, err := ethclient.Dial("http://127.0.0.1:7545")
+	if err != nil {
+		log.Fatalf("Eth client bağlantisi basarisiz")
+	}
+
 	mwChain := middleware.NewMiddlewareChain(
 		&middleware.LogMiddleware{},
 		middleware.NewRateLimitMiddleware(3, 2*time.Second),
+		middleware.NewAuthMiddleware(client),
 	)
 	proxyServer := &Server{
 		backendClients: backendClients,
